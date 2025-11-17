@@ -43,6 +43,16 @@ class FragmentClient:
     from .stars import FragmentStarsAPI
     return FragmentStarsAPI(self)
   
+  @property
+  def premium(self) -> "FragmentPremiumAPI":
+    from .premium import FragmentPremiumAPI
+    return FragmentPremiumAPI(self)
+  
+  @property
+  def ads(self) -> "FragmentAdsAPI":
+    from .ads import FragmentAdsAPI
+    return FragmentAdsAPI(self)
+  
   def _setup_client_data(self) -> None:
     try:
       response = http_request(self._ctx.base_url, method='GET', cookies=self._ctx.cookies)
@@ -62,7 +72,7 @@ class FragmentClient:
     except HTTPError as error:
       raise FragmentDataSetupError("Error setting up client data.")
   
-  def send_fragment_request(self, method: FragmentMethod, body) -> Tuple[Optional[str], Optional[str]]:
+  def send_fragment_request(self, method: FragmentMethod, body) -> Tuple[Optional[dict], Optional[str]]:
     try:
       response = http_request(
         self._ctx.base_url,

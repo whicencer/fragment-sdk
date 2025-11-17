@@ -2,7 +2,7 @@ import base64
 from tonutils.client import TonapiClient
 from tonutils.wallet.messages import TransferMessage
 from typing import Optional, Any
-from ..errors import WalletVersionError
+from ..errors import WalletVersionError, WalletBalanceInsufficient
 
 NANO = 1_000_000_000
 
@@ -52,29 +52,32 @@ class WalletClient:
   def _decode_payload(self, payload: str) -> str:
     from tonutils.utils import Slice, Cell
     
-    missing_padding = len(payload) % 4
-    if missing_padding:
-      payload += "=" * (4 - missing_padding)
+    payload = payload.strip()
+    payload += "=" * ((4 - len(payload) % 4) % 4)
     
     boc_bytes = base64.b64decode(payload)
-    
     cell = Cell.one_from_boc(boc_bytes)
     cs = cell.begin_parse()
     
     op = cs.load_uint(32)
-    comment = cs.load_string()
+    comment = cs.load_snake_string()
     return comment
   
   async def process_transaction(self, destination: str, amount: str, body: str) -> Optional[str]:
     if not self._wallet:
       raise ValueError("Wallet not connected.")
     
+    amount = int(amount) / NANO
+    wallet_balance = await self.get_balance()
+    if wallet_balance < amount:
+      raise WalletBalanceInsufficient("Wallet balance insufficient.")
+    
     body = self._decode_payload(body)
     try:
       messages = [
         TransferMessage(
           destination=destination,
-          amount=int(amount) / NANO,
+          amount=amount,
           body=body
         )
       ]

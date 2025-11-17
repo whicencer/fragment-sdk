@@ -19,10 +19,17 @@ class FragmentInitError(FragmentClientError):
 class StarsOperationError(FragmentClientError):
   """Errors in Stars operations"""
 
+class PremiumOperationError(FragmentClientError):
+  """Errors in Telegram Premium operations"""
+
+class AdsOperationError(FragmentClientError):
+  """Errors in Telegram Ads operations"""
+
 class WalletError(FragmentClientError):
   """Raised when there's a problem with wallet."""
 
 class WalletVersionError(WalletError):
   """Raised when wrong wallet version specified"""
-  def __init__(self, message):
-    super(WalletVersionError, self).__init__(message)
+
+class WalletBalanceInsufficient(WalletError):
+  """Raised when wallet balance insufficient"""

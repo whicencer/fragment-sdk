@@ -1,44 +1,43 @@
-from typing import Tuple, Optional, Any
 from .utils.extract_photo_src import extract_photo_src
+
 from .methods import FragmentMethod
-from .errors import StarsOperationError, FragmentAPIError, WalletBalanceInsufficient
+from .errors import PremiumOperationError, FragmentAPIError, WalletBalanceInsufficient
 from .models import (
   ApiResult,
   SearchRecipientResponseData,
   InitPurchaseResponseData,
   Transaction,
-  TransactionMessage,
+  TransactionMessage
 )
 
-class FragmentStarsAPI:
+class FragmentPremiumAPI:
   def __init__(self, client: "FragmentClient") -> None:
     self._client = client
     self._wallet = self._client._ctx.wallet
   
-  def init_buy_stars_request(self, recipient_id, quantity) -> ApiResult[InitPurchaseResponseData]:
+  def init_gift_premium_request(self, recipient_id, months) -> ApiResult[InitPurchaseResponseData]:
     try:
       data, error = self._client.send_fragment_request(
-        method=FragmentMethod.INIT_BUY_STARS,
-        body={ 'recipient': recipient_id, 'quantity': quantity }
+        method=FragmentMethod.INIT_GIFT_PREMIUM,
+        body={ 'recipient': recipient_id, 'months': months }
       )
       
       if error:
-        return ApiResult.fail(f'Failed to initialize Stars purchase: {error}')
+        return ApiResult.fail(f"Failed to initialize Premium purchase: {error}")
       
       return ApiResult.ok(
         data=InitPurchaseResponseData(
           req_id=data.get("req_id"),
-          amount=data.get("amount"),
-          to_bot=bool(data.get("to_bot"))
+          amount=data.get("amount")
         )
       )
     except FragmentAPIError as error:
-      raise StarsOperationError(f"Failed to initialize Stars purchase: {error}")
+      raise PremiumOperationError(f"Failed to initialize Premium purchase: {error}")
   
-  def get_buy_stars_link(self, account, req_id) -> ApiResult[Transaction]:
+  def get_gift_premium_link(self, account, req_id) -> ApiResult[Transaction]:
     try:
       data, error = self._client.send_fragment_request(
-        method=FragmentMethod.GET_BUY_STARS_LINK,
+        method=FragmentMethod.GET_GIFT_PREMIUM_LINK,
         body={
           'account': account,
           'transaction': '1',
@@ -48,7 +47,7 @@ class FragmentStarsAPI:
       )
       
       if error:
-        return ApiResult.fail(f'Failed to obtain Stars purchase link: {error}')
+        return ApiResult.fail(f'Failed to obtain Premium purchase link: {error}')
       
       transaction = data.get('transaction')
       transaction_messages = transaction.get('messages')
@@ -68,20 +67,20 @@ class FragmentStarsAPI:
         )
       )
     except FragmentAPIError as error:
-      raise StarsOperationError(f"Failed to obtain Stars purchase link: {error}")
+      raise PremiumOperationError(f"Failed to obtain Premium purchase link: {error}")
   
-  def search_stars_recipient(self, recipient_username) -> ApiResult[SearchRecipientResponseData]:
+  def search_premium_recipient(self, recipient_username) -> ApiResult[SearchRecipientResponseData]:
     try:
       data, error = self._client.send_fragment_request(
-        method=FragmentMethod.SEARCH_STARS_RECIPIENT,
+        method=FragmentMethod.SEARCH_PREMIUM_RECIPIENT,
         body={
           'query': recipient_username,
-          'quantity': '',
+          'months': ''
         }
       )
       
       if error:
-        return ApiResult.fail(f"Failed to obtain Stars recipient: {error}")
+        return ApiResult.fail(f"Failed to obtain Premium recipient: {error}")
       
       if found := data.get('found'):
         photo = found.get('photo')
@@ -95,19 +94,16 @@ class FragmentStarsAPI:
         )
       )
     except FragmentAPIError as error:
-      raise StarsOperationError(f"Failed to obtain Stars recipient: {error}")
+      raise PremiumOperationError(f"Failed to obtain Premium recipient: {error}")
   
-  def create_stars_transaction(self, recipient_id, quantity, wallet_account) -> ApiResult[Transaction]:
+  def create_premium_transaction(self, recipient_id, months, wallet_account) -> ApiResult[Transaction]:
     try:
-      init_data = self.init_buy_stars_request(
-        recipient_id=recipient_id,
-        quantity=quantity
-      )
+      init_data = self.init_gift_premium_request(recipient_id=recipient_id, months=months)
       
       if init_data.error:
         return ApiResult.fail(init_data.error)
       
-      buy_transaction = self.get_buy_stars_link(
+      buy_transaction = self.get_gift_premium_link(
         account=wallet_account,
         req_id=init_data.data.req_id
       )
@@ -116,20 +112,20 @@ class FragmentStarsAPI:
         return ApiResult.fail(buy_transaction.error)
       
       return ApiResult.ok(data=buy_transaction.data)
-    except StarsOperationError:
+    except PremiumOperationError:
       raise
   
-  async def buy_stars(self, username: str, quantity: int) -> ApiResult[str]:
+  async def buy_premium(self, username, months = 3) -> ApiResult[str]:
     try:
-      recipient = self.search_stars_recipient(recipient_username=username)
+      recipient = self.search_premium_recipient(recipient_username=username)
       if recipient.error:
-        return ApiResult.fail(recipient.error)
+        return ApiResult.fail(error=recipient.error)
       wallet_account = self._wallet.get_wallet_data()
-      transaction = self.create_stars_transaction(recipient_id=recipient.data.recipient_id, quantity=quantity, wallet_account=wallet_account)
+      transaction = self.create_premium_transaction(recipient_id=recipient.data.recipient_id, months=months, wallet_account=wallet_account)
       
       if transaction.error:
-        return ApiResult.fail(transaction.error)
-
+        return ApiResult.fail(error=transaction.error)
+      
       transaction_msg = transaction.data.messages[0]
       tx_hash = await self._wallet.process_transaction(
         destination=transaction_msg.address,
@@ -140,5 +136,5 @@ class FragmentStarsAPI:
       return ApiResult.ok(data=tx_hash)
     except WalletBalanceInsufficient as error:
       return ApiResult.fail(error=error)
-    except StarsOperationError:
+    except PremiumOperationError:
       raise

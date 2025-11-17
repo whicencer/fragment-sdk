@@ -23,9 +23,9 @@
 
 - Purchase Telegram Stars
 
--  ~~Purchase Telegram Premium~~
+-  Purchase Telegram Premium
 
--  ~~Top up Telegram Ads (TON) balance~~
+-  Top up Telegram Ads (TON) balance
 
 ## 📦 Usage
 

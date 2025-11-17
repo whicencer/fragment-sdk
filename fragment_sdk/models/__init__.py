@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import List, Any, Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, TypeVar, List
 
 T = TypeVar("T")
 
@@ -25,23 +25,24 @@ class ApiResult(Generic[T]):
     return self.success
 
 @dataclass
-class InitBuyStarsResponseData(BaseResponseModel):
-  req_id: str
-  to_bot: bool
-  amount: str
-
-@dataclass
-class BuyStarsTxMessage(BaseResponseModel):
-  address: str
-  amount: str
-  payload: str
-@dataclass
-class BuyStarsTransaction(BaseResponseModel):
-  validUntil: int
-  messages: List[BuyStarsTxMessage]
-
-@dataclass
 class SearchRecipientResponseData(BaseResponseModel):
   recipient_id: str
   name: str
   photo_url: str | None
+
+@dataclass
+class InitPurchaseResponseData(BaseResponseModel):
+  req_id: str
+  amount: str
+  to_bot: Optional[bool] = None
+
+@dataclass
+class TransactionMessage(BaseResponseModel):
+  address: str
+  amount: str
+  payload: str
+
+@dataclass
+class Transaction(BaseResponseModel):
+  validUntil: int
+  messages: List[TransactionMessage]
