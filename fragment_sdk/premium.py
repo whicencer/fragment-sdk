@@ -96,7 +96,7 @@ class FragmentPremiumAPI:
     except FragmentAPIError as error:
       raise PremiumOperationError(f"Failed to obtain Premium recipient: {error}")
   
-  def create_premium_transaction(self, recipient_id, months, wallet_account) -> ApiResult[Transaction]:
+  def create_premium_transaction(self, recipient_id, months) -> ApiResult[Transaction]:
     try:
       init_data = self.init_gift_premium_request(recipient_id=recipient_id, months=months)
       
@@ -104,7 +104,7 @@ class FragmentPremiumAPI:
         return ApiResult.fail(init_data.error)
       
       buy_transaction = self.get_gift_premium_link(
-        account=wallet_account,
+        account=self._wallet.get_wallet_data(),
         req_id=init_data.data.req_id
       )
       

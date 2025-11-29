@@ -92,7 +92,7 @@ class FragmentAdsAPI:
     except FragmentAPIError as error:
       raise AdsOperationError(f'Failed to obtain Ads topup recipient: {error}')
   
-  def create_premium_transaction(self, recipient_id, amount, wallet_account) -> ApiResult[Transaction]:
+  def create_premium_transaction(self, recipient_id, amount) -> ApiResult[Transaction]:
     try:
       init_data = self.init_ads_topup_request(recipient_id=recipient_id, amount=amount)
       
@@ -100,7 +100,7 @@ class FragmentAdsAPI:
         return ApiResult.fail(init_data.error)
       
       topup_transaction = self.get_ads_topup_link(
-        account=wallet_account,
+        account=self._wallet.get_wallet_data(),
         req_id=init_data.data.req_id
       )
       

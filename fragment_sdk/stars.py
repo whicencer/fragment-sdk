@@ -97,7 +97,7 @@ class FragmentStarsAPI:
     except FragmentAPIError as error:
       raise StarsOperationError(f"Failed to obtain Stars recipient: {error}")
   
-  def create_stars_transaction(self, recipient_id, quantity, wallet_account) -> ApiResult[Transaction]:
+  def create_stars_transaction(self, recipient_id, quantity) -> ApiResult[Transaction]:
     try:
       init_data = self.init_buy_stars_request(
         recipient_id=recipient_id,
@@ -108,7 +108,7 @@ class FragmentStarsAPI:
         return ApiResult.fail(init_data.error)
       
       buy_transaction = self.get_buy_stars_link(
-        account=wallet_account,
+        account=self._wallet.get_wallet_data(),
         req_id=init_data.data.req_id
       )
       
