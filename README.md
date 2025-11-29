@@ -3,8 +3,9 @@
 	<h1  style="margin-top: 24px;">Fragment SDK</h1>
 	<div>
 		<a href="https://t.me/fragmentsdk">News</a> |
+		<a href="https://whicencer.github.io/fragment-sdk">Documentation</a> |
 		<a href="https://t.me/fragmentsdk_chat">Telegram Chat</a> |
-		<a href="https://t.me/whicencer">Contact developer</a>
+		<a href="https://t.me/whicencer">Contact developer</a> |
 	</div>
 </div>
 
