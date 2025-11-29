@@ -2,10 +2,10 @@
 	<img src="https://raw.githubusercontent.com/whicencer/fragment-sdk/refs/heads/main/logo.png"  alt="Library Logo"  width="100"  height="100">
 	<h1  style="margin-top: 24px;">Fragment SDK</h1>
 	<div>
-		<a href="https://t.me/fragmentsdk">News</a> |
-		<a href="https://whicencer.github.io/fragment-sdk">Documentation</a> |
-		<a href="https://t.me/fragmentsdk_chat">Telegram Chat</a> |
-		<a href="https://t.me/whicencer">Contact developer</a> |
+		<a href="https://t.me/fragmentsdk" target="_blank">News</a> |
+		<a href="https://whicencer.github.io/fragment-sdk" target="_blank">Documentation</a> |
+		<a href="https://t.me/fragmentsdk_chat" target="_blank">Telegram Chat</a> |
+		<a href="https://t.me/whicencer" target="_blank">Contact developer</a> |
 	</div>
 </div>
 
